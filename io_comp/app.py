@@ -10,13 +10,16 @@ def main():
     repo = CSVCalendarRepository(csv_path)
     finder = AvailabilityFinder(repo)
     
-    people = ["Alice","Bob","Jack"]
+    people = ["Alice","Jack"]
     duration = timedelta(minutes=60)
     
     available_slots = finder.find_available_slots(people, duration)
     
-    for slot in available_slots:
-        print(f"Starting Time of available slots: {slot.start.strftime('%H:%M')} - {slot.end.strftime('%H:%M')}")
+    for window in available_slots:
+        if window.earliest == window.latest:
+            print(f"Meeting can start at: {window.earliest.strftime('%H:%M')}")
+        else:
+            print(f"Meeting can start between: {window.earliest.strftime('%H:%M')} - {window.latest.strftime('%H:%M')}")
 
 if __name__ == "__main__":
     main()

@@ -3,6 +3,7 @@
 A professional-grade Python implementation for finding mutual availability across multiple calendars. This project demonstrates clean code practices, modular design, and efficient algorithmic logic.
 
 ## 🚀 Overview
+
 The **Calendar Scheduler** is a command-line tool that processes participant schedules from a CSV source and identifies shared free time slots within a standard working day (**07:00 - 19:00**).
 
 
@@ -10,6 +11,7 @@ The **Calendar Scheduler** is a command-line tool that processes participant sch
 ---
 
 ## 🛠 Architectural Design
+
 This solution is built upon **SOLID principles** to ensure maintainability and scalability:
 
 1. **Decoupled Layers**:
@@ -20,8 +22,37 @@ This solution is built upon **SOLID principles** to ensure maintainability and s
 3. **Dependency Injection**: The service layer receives its data source via the constructor, making the system highly testable with Mocks.
 
 ---
+## Example
+
+Attached is an example calendar file `calendar.csv`:
+
+```
+Alice,"Morning meeting",08:00,09:30
+Alice,"Lunch with Jack",13:00,14:00
+Alice,"Yoga",16:00,17:00
+Jack,"Morning meeting",08:00,08:50
+Jack,"Sales call",09:00,09:40
+Jack,"Lunch with Alice",13:00,14:00
+Jack,"Yoga",16:00,17:00
+Bob,"Morning meeting",08:00,09:30
+Bob,"Morning meeting 2",09:30,09:40
+Bob,"Q3 review",10:00,11:30
+Bob,"Lunch and siesta",13:00,15:00
+Bob,"Yoga",16:00,17:00
+```
+
+For this input, and for a meeting of 60 minutes which Alice & Jack should attend the following output is expected:
+
+```
+Starting Time of available slots: 07:00
+Starting Time of available slots: 09:40 - 12:00
+Starting Time of available slots: 14:00 - 15:00
+Starting Time of available slots: 17:00 - 18:00
+```
+---
 
 ## 📂 Project Structure
+
 ```text
 python-project/
 ├── io_comp/              # Application Package
