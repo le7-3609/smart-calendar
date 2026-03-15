@@ -4,9 +4,11 @@ Version: 1.0.0
 Summary: Comp In-Office Coding Evaluation - Python Implementation
 Home-page: https://comp.io
 Requires-Python: >=3.8
+Requires-Dist: flask>=3.0.0
 Provides-Extra: dev
 Requires-Dist: pytest>=7.0.0; extra == "dev"
 Dynamic: home-page
 Dynamic: provides-extra
+Dynamic: requires-dist
 Dynamic: requires-python
 Dynamic: summary

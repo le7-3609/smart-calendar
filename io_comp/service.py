@@ -1,5 +1,7 @@
 from datetime import time, timedelta, datetime
-from config import DAY_START, DAY_END
+from functools import reduce
+from itertools import chain
+from io_comp.config import DAY_START, DAY_END
 from io_comp.models import TimeSlot, StartWindow
 from io_comp.repository import CalendarRepository
 
@@ -41,30 +43,34 @@ class AvailabilityFinder:
         return available
 
     def _merge_busy_slots(self, slots: list[TimeSlot]) -> list[TimeSlot]:
-        if not slots: return []
+        if not slots:
+            return []
+
         sorted_slots = sorted(slots, key=lambda x: x.start)
-        merged = [sorted_slots[0]]
-        for current in sorted_slots[1:]:
+
+        def reducer(merged: list[TimeSlot], current: TimeSlot) -> list[TimeSlot]:
+            if not merged:
+                return [current]
             last = merged[-1]
             if current.start <= last.end:
                 merged[-1] = TimeSlot(last.start, max(last.end, current.end))
-            else:
-                merged.append(current)
-        return merged
+                return merged
+            return merged + [current]
+
+        return reduce(reducer, sorted_slots, [])
 
     def _calculate_free_slots(self, busy_slots: list[TimeSlot], duration: timedelta) -> list[StartWindow]:
         available_slots = []
         current_time = DAY_START
-        
-        for slot in busy_slots:
+
+        # Use itertools.chain to treat the end-of-day as a final sentinel slot
+        sentinel_end = TimeSlot(DAY_END, DAY_END)
+        for slot in chain(busy_slots, [sentinel_end]):
             if self._is_gap_sufficient(current_time, slot.start, duration):
                 latest_start = self._subtract_duration(slot.start, duration)
                 available_slots.append(StartWindow(current_time, latest_start))
             current_time = max(current_time, slot.end)
-            
-        if self._is_gap_sufficient(current_time, DAY_END, duration):
-            latest_start = self._subtract_duration(DAY_END, duration)
-            available_slots.append(StartWindow(current_time, latest_start))
+
         return available_slots
 
     def _is_gap_sufficient(self, start: time, end: time, duration: timedelta) -> bool:

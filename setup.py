@@ -7,7 +7,9 @@ setup(
     url="https://comp.io",
     packages=find_packages(),
     python_requires=">=3.8",
-    install_requires=[],
+    install_requires=[
+        "flask>=3.0.0",
+    ],
     extras_require={
         "dev": [
             "pytest>=7.0.0",
@@ -16,6 +18,7 @@ setup(
     entry_points={
         "console_scripts": [
             "comp-calendar=io_comp.app:main",
+            "comp-calendar-api=io_comp.api:main",
         ],
     },
 )

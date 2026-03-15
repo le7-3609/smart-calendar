@@ -1,2 +1,3 @@
 [console_scripts]
 comp-calendar = io_comp.app:main
+comp-calendar-api = io_comp.api:main

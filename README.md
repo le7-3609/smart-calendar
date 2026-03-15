@@ -22,7 +22,7 @@ This solution is built upon **SOLID principles** to ensure maintainability and s
 3. **Dependency Injection**: The service layer receives its data source via the constructor, making the system highly testable with Mocks.
 4. **Early Exit Optimisation**: People are processed one at a time. After adding each person's events, the available windows are recomputed. If the intersection becomes empty at any point, the algorithm returns immediately without processing the remaining people.
 5. **Protocol-based Abstraction**: The repository interface is defined using `Protocol` (structural subtyping) rather than ABC, enabling static duck-typing — a modern, decoupled approach where any class satisfying the interface is automatically compatible.
-6. **Functional Programming**: Filtering and transformation in the repository layer use `filter` and list comprehensions to improve readability and composability.
+6. **Functional Programming**: The scheduling logic uses `functools.reduce` and `itertools.chain` for interval merging and gap calculation, alongside `filter` and comprehensions in the repository, to express the algorithm in a composable, declarative style.
 
 ---
 ## Example
@@ -60,14 +60,15 @@ Starting Time of available slots: 17:00 - 18:00
 python-project/
 ├── io_comp/              # Application Package
 │   ├── models.py         # Data representations
-│   ├── repository.py     # CSV Data Access
+│   ├── repository.py     # CSV Data Access & repository factory
 │   ├── service.py        # Scheduling Logic
-│   └── app.py            # Application Entry Point
+│   ├── app.py            # CLI Entry Point
+│   └── api.py            # HTTP API (Flask)
 ├── tests/                # Automated Test Suite
 │   └── test_app.py       # Unit & Edge-case tests
 ├── resources/            # Data Storage
 │   └── calendar.csv      # Source schedule
-├── setup.py              # Installation script
+├── setup.py              # Installation script & console entry points
 └── requirements.txt      # Project dependencies
 ```
 
@@ -92,9 +93,28 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-### 3. Running the App
+### 3. Running the CLI App
 ```bash
-python -m io_comp.app
+# Using the console script
+comp-calendar --people Alice Jack --duration 60
+
+# Or directly via the module
+python -m io_comp.app --people Alice Jack --duration 60
+```
+
+### 4. Running the HTTP API (Flask)
+
+After installation, you can also expose the scheduler as a simple HTTP API:
+
+```bash
+# Start the API server
+comp-calendar-api
+
+# Example request (default people & duration)
+curl "http://127.0.0.1:5000/availability"
+
+# Example with explicit query parameters
+curl "http://127.0.0.1:5000/availability?people=Alice,Jack&duration=60"
 ```
 
 ## 🧪 Quality Assurance
