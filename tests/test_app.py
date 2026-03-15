@@ -1,8 +1,8 @@
 import pytest
 from datetime import timedelta, time
-from io_comp.models import TimeSlot, StartWindow
+from io_comp.models import TimeSlot, StartWindow, ResourceNotFoundError
 from io_comp.service import AvailabilityFinder
-from io_comp.repository import CalendarRepository
+from io_comp.repository import CalendarRepository, CSVCalendarRepository
 
 class MockCalendarRepo(CalendarRepository):
     def __init__(self, events): self.events = events
@@ -93,3 +93,48 @@ def test_start_window_is_narrower_than_free_slot():
     assert len(slots) == 1
     assert slots[0].earliest == time(8, 30)   
     assert slots[0].latest == time(9, 0)     
+
+
+def test_missing_csv_raises_resource_not_found():
+    repo = CSVCalendarRepository('this_file_does_not_exist_12345.csv')
+    with pytest.raises(ResourceNotFoundError):
+        repo.get_events_for_people(['Alice'])
+
+
+def test_malformed_rows_are_ignored(tmp_path):
+    csv_content = """
+Alice,Meeting,09:00,10:00
+BadRowWithoutEnoughFields
+Jack,Call,11:00,12:00
+Too,Short,Only
+"""
+    p = tmp_path / "sample.csv"
+    p.write_text(csv_content)
+
+    repo = CSVCalendarRepository(str(p))
+    events = repo.get_events_for_people(['Alice', 'Jack'])
+
+    assert isinstance(events, list)
+    assert TimeSlot(time(9, 0), time(10, 0)) in events
+    assert TimeSlot(time(11, 0), time(12, 0)) in events
+
+
+def test_empty_person_list_returns_empty():
+    class DummyRepo:
+        def get_events_for_people(self, person_list):
+            # Should not be called for empty person_list
+            raise AssertionError("Repository should not be queried when person_list is empty")
+
+    finder = AvailabilityFinder(DummyRepo())
+    slots = finder.find_available_slots([], timedelta(minutes=60))
+    assert slots == []
+
+
+def test_non_positive_duration_returns_empty():
+    class DummyRepo:
+        def get_events_for_people(self, person_list):
+            return []
+
+    finder = AvailabilityFinder(DummyRepo())
+    assert finder.find_available_slots(['Alice'], timedelta(minutes=0)) == []
+    assert finder.find_available_slots(['Alice'], timedelta(minutes=-30)) == []

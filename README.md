@@ -18,8 +18,11 @@ This solution is built upon **SOLID principles** to ensure maintainability and s
    - **Models**: Immutable data structures using `dataclasses`.
    - **Repository**: An abstraction layer for data fetching, allowing easy migration from CSV to SQL/APIs.
    - **Service**: The core business logic, isolated from I/O operations.
-2. **Interval Merging Algorithm**: Implements an $O(N \log N)$ approach to merge overlapping busy periods, ensuring high performance even with complex schedules.
+2. **Interval Merging Algorithm**: Implements an $O(N \log N)$ merge algorithm that sorts events once and sweeps through in a single pass — a two-pointer approach that achieves $O(N+M)$ when merging two people's pre-sorted event lists in parallel, since both lists are traversed once without nested comparison.
 3. **Dependency Injection**: The service layer receives its data source via the constructor, making the system highly testable with Mocks.
+4. **Early Exit Optimisation**: People are processed one at a time. After adding each person's events, the available windows are recomputed. If the intersection becomes empty at any point, the algorithm returns immediately without processing the remaining people.
+5. **Protocol-based Abstraction**: The repository interface is defined using `Protocol` (structural subtyping) rather than ABC, enabling static duck-typing — a modern, decoupled approach where any class satisfying the interface is automatically compatible.
+6. **Functional Programming**: Filtering and transformation in the repository layer use `filter` and list comprehensions to improve readability and composability.
 
 ---
 ## Example

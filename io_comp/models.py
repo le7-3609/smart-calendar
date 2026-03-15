@@ -21,3 +21,13 @@ class StartWindow:
     '''
     earliest: time
     latest: time
+
+
+class CalendarError(Exception):
+    """Base exception for all calendar-related errors."""
+    pass
+
+
+class ResourceNotFoundError(CalendarError):
+    """Raised when a required resource (e.g. CSV file) cannot be found."""
+    pass
